@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback } from "react";
-import SessionBadge from "./SessionBadge";
 
 const DEFAULT_DESIGN = {
   // Colors
@@ -18,6 +17,10 @@ const DEFAULT_DESIGN = {
   backAddressX: 8, backAddressY: 48,
   backContactX: 8, backContactY: 68,
   backFontSize: 8,
+  // Individual back font sizes
+  backGuardianFontSize: 8,
+  backAddressFontSize: 8,
+  backContactFontSize: 8,
   // Style
   pattern: "circles", showBorder: true, borderColor: "#f0c040",
   roundness: 10, fontFamily: "Georgia",
@@ -126,7 +129,8 @@ function CardBack({ design, person }) {
     backGuardianX, backGuardianY,
     backAddressX, backAddressY,
     backContactX, backContactY,
-    backFontSize, orientation,
+    backGuardianFontSize, backAddressFontSize, backContactFontSize,
+    orientation,
   } = design;
 
   const isPortrait = orientation === "portrait";
@@ -152,7 +156,7 @@ function CardBack({ design, person }) {
       {/* Guardian */}
       <div style={{position:"absolute",left:px(backGuardianX),top:py(backGuardianY),right:"8px"}}>
         <div style={{color:`${textColor}66`,fontSize:"6px",letterSpacing:"1.5px",textTransform:"uppercase",textShadow:tShadow,marginBottom:"2px"}}>Guardian / Emergency Contact</div>
-        <div style={{color:textColor,fontSize:`${backFontSize}px`,fontWeight:600,textShadow:tShadow,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+        <div style={{color:textColor,fontSize:`${backGuardianFontSize}px`,fontWeight:600,textShadow:tShadow,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
           {person?.guardian||"—"}
         </div>
       </div>
@@ -160,7 +164,7 @@ function CardBack({ design, person }) {
       {/* Address */}
       <div style={{position:"absolute",left:px(backAddressX),top:py(backAddressY),right:"8px"}}>
         <div style={{color:`${textColor}66`,fontSize:"6px",letterSpacing:"1.5px",textTransform:"uppercase",textShadow:tShadow,marginBottom:"2px"}}>Address</div>
-        <div style={{color:textColor,fontSize:`${backFontSize}px`,fontWeight:400,textShadow:tShadow,lineHeight:1.4,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>
+        <div style={{color:textColor,fontSize:`${backAddressFontSize}px`,fontWeight:400,textShadow:tShadow,lineHeight:1.4,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>
           {person?.address||"—"}
         </div>
       </div>
@@ -168,7 +172,7 @@ function CardBack({ design, person }) {
       {/* Contact */}
       <div style={{position:"absolute",left:px(backContactX),top:py(backContactY),right:"8px"}}>
         <div style={{color:`${textColor}66`,fontSize:"6px",letterSpacing:"1.5px",textTransform:"uppercase",textShadow:tShadow,marginBottom:"2px"}}>Contact Number</div>
-        <div style={{color:accentColor,fontSize:`${backFontSize}px`,fontWeight:700,fontFamily:"Courier New",letterSpacing:"1px",textShadow:tShadow}}>
+        <div style={{color:accentColor,fontSize:`${backContactFontSize}px`,fontWeight:700,fontFamily:"Courier New",letterSpacing:"1px",textShadow:tShadow}}>
           {person?.contact||"—"}
         </div>
       </div>
@@ -226,6 +230,11 @@ const SelectInp = ({value, onChange, options}) => (
     style={{width:"100%",padding:"6px",background:"#1a1a1a",border:"1px solid #2a2a2a",color:"#fff",borderRadius:"6px",fontSize:"12px"}}>
     {options.map(o=><option key={o.value||o} value={o.value||o}>{o.label||o}</option>)}
   </select>
+);
+
+// Font size display badge
+const FontSizeBadge = ({value}) => (
+  <span style={{fontSize:"10px",color:"#f0c040",fontFamily:"monospace",background:"#f0c04011",borderRadius:"4px",padding:"1px 5px",marginLeft:"4px"}}>{value}px</span>
 );
 
 // ── Main App ─────────────────────────────────────────────────
@@ -342,7 +351,6 @@ export default function IDCardStudio() {
               <button key={t} onClick={()=>setTab(t)} style={tabStyle(t)}>{l}</button>
             ))}
           </div>
-          <SessionBadge />
         </div>
       </div>
 
@@ -507,21 +515,27 @@ export default function IDCardStudio() {
               <Section title="👨‍👩‍👧 Guardian Position">
                 <Row label="Left %"><Slider value={design.backGuardianX} onChange={v=>set("backGuardianX",v)} /></Row>
                 <Row label="Top %"><Slider value={design.backGuardianY} onChange={v=>set("backGuardianY",v)} /></Row>
+                <Row label={<span>Font Size <FontSizeBadge value={design.backGuardianFontSize} /></span>}>
+                  <Slider value={design.backGuardianFontSize} onChange={v=>set("backGuardianFontSize",v)} min={6} max={18} />
+                </Row>
               </Section>
 
               <Section title="🏠 Address Position">
                 <Row label="Left %"><Slider value={design.backAddressX} onChange={v=>set("backAddressX",v)} /></Row>
                 <Row label="Top %"><Slider value={design.backAddressY} onChange={v=>set("backAddressY",v)} /></Row>
+                <Row label={<span>Font Size <FontSizeBadge value={design.backAddressFontSize} /></span>}>
+                  <Slider value={design.backAddressFontSize} onChange={v=>set("backAddressFontSize",v)} min={6} max={18} />
+                </Row>
               </Section>
 
               <Section title="📞 Contact Position">
                 <Row label="Left %"><Slider value={design.backContactX} onChange={v=>set("backContactX",v)} /></Row>
                 <Row label="Top %"><Slider value={design.backContactY} onChange={v=>set("backContactY",v)} /></Row>
+                <Row label={<span>Font Size <FontSizeBadge value={design.backContactFontSize} /></span>}>
+                  <Slider value={design.backContactFontSize} onChange={v=>set("backContactFontSize",v)} min={6} max={18} />
+                </Row>
               </Section>
 
-              <Section title="✏️ Back Text">
-                <Row label="Font Size"><Slider value={design.backFontSize} onChange={v=>set("backFontSize",v)} min={6} max={14} /></Row>
-              </Section>
             </>}
 
             <button onClick={()=>setDesign(DEFAULT_DESIGN)} style={{width:"100%",padding:"8px",borderRadius:"6px",background:"#1a1a1a",border:"1px solid #2a2a2a",color:"#555",fontSize:"12px",cursor:"pointer",marginTop:"4px"}}>
