@@ -37,13 +37,10 @@ function loadSession() {
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(() => loadSession());
 
-  useEffect(() => {
-    if (!session) return;
-    const remaining = session.expiresAt - Date.now();
-    if (remaining <= 0) { logout(); return; }
-    const timer = setTimeout(() => logout(), remaining);
-    return () => clearTimeout(timer);
-  }, [session, logout]);
+  const logout = useCallback(() => {
+    sessionStorage.removeItem(SESSION_KEY);
+    setSession(null);
+  }, []);
 
   const login = useCallback((username, password) => {
     const user = MOCK_USERS.find(u => u.username === username && u.password === password);
@@ -62,10 +59,13 @@ export function AuthProvider({ children }) {
     return { success: true };
   }, []);
 
-  const logout = useCallback(() => {
-    sessionStorage.removeItem(SESSION_KEY);
-    setSession(null);
-  }, []);
+  useEffect(() => {
+    if (!session) return;
+    const remaining = session.expiresAt - Date.now();
+    if (remaining <= 0) { logout(); return; }
+    const timer = setTimeout(() => logout(), remaining);
+    return () => clearTimeout(timer);
+  }, [session, logout]);
 
   const isAuthenticated = !!session;
   const timeRemaining = session ? Math.max(0, session.expiresAt - Date.now()) : 0;
