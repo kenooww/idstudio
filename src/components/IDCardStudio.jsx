@@ -1,6 +1,31 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 
 // ── Google Drive URL → fallback chain ─────────────────────────
+
+// ── Load html2canvas from CDN on demand ──────────────────────
+function loadHtml2Canvas() {
+  return new Promise((resolve, reject) => {
+    if (window.html2canvas) { resolve(window.html2canvas); return; }
+    const script = document.createElement("script");
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+    script.onload = () => resolve(window.html2canvas);
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
+async function captureNodeToPng(node) {
+  const h2c = await loadHtml2Canvas();
+  const canvas = await h2c(node, {
+    scale: 3,
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: "#ffffff",
+    logging: false,
+  });
+  return canvas.toDataURL("image/png", 1.0);
+}
+
 function getPhotoFallbacks(url) {
   if (!url || !url.trim()) return [];
   const u = url.trim();
@@ -477,8 +502,7 @@ export default function IDCardStudio() {
         setTimeout(res, 800);
       });
       try {
-        const {toPng} = await import("html-to-image");
-        const dataUrl = await toPng(container, {quality:1,pixelRatio:3,cacheBust:true});
+        const dataUrl = await captureNodeToPng(container);
         const a = document.createElement("a");
         a.download = `ID_${emp.name.replace(/[^a-z0-9]/gi,"_")}_${emp.id}.png`;
         a.href = dataUrl; a.click();
@@ -504,8 +528,7 @@ export default function IDCardStudio() {
     br.render(<CardBack design={design} person={emp}/>);
     await new Promise(r=>setTimeout(r,800));
     try {
-      const {toPng} = await import("html-to-image");
-      const dataUrl = await toPng(container,{quality:1,pixelRatio:3,cacheBust:true});
+      const dataUrl = await captureNodeToPng(container);
       const a=document.createElement("a");
       a.download=`ID_${person.name.replace(/[^a-z0-9]/gi,"_")}.png`;
       a.href=dataUrl; a.click();
