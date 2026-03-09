@@ -43,7 +43,7 @@ export function AuthProvider({ children }) {
     if (remaining <= 0) { logout(); return; }
     const timer = setTimeout(() => logout(), remaining);
     return () => clearTimeout(timer);
-  }, [session]);
+  }, [session, logout]);
 
   const login = useCallback((username, password) => {
     const user = MOCK_USERS.find(u => u.username === username && u.password === password);
