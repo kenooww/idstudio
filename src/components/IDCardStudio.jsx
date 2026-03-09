@@ -33,7 +33,7 @@ const DEFAULT_DESIGN = {
 };
 
 const PATTERNS = ["circles", "lines", "dots", "none"];
-const FONTS = ["Georgia", "Trebuchet MS", "Palatino", "Courier New", "Tahoma"];
+const FONTS = ["Georgia", "Trebuchet MS", "Palatino", "Courier New", "Tahoma","Arial", "Verdana", "Times New Roman"];
 
 // ── FRONT CARD ───────────────────────────────────────────────
 function CardFront({ design, person }) {
@@ -568,7 +568,7 @@ export default function IDCardStudio() {
                 ✅ Sheet shared as Viewer
               </div>
               <button onClick={fetchData} disabled={loading} style={{width:"100%",padding:"10px",borderRadius:"7px",border:"none",cursor:loading?"not-allowed":"pointer",background:loading?"#333":"linear-gradient(135deg, #f0c040, #e0a020)",color:"#0a0a0a",fontWeight:700,fontSize:"13px"}}>
-                {loading?"⏳ Fetching...":"⚡ Fetch Employees"}
+                {loading?"⏳ Fetching...":"⚡ Fetch Dataset"}
               </button>
               {error && <div style={{marginTop:"10px",background:"#2a0a0a",border:"1px solid #e9456033",borderRadius:"6px",padding:"8px",color:"#e94560",fontSize:"11px"}}>⚠️ {error}</div>}
               {employees.length > 0 && (
