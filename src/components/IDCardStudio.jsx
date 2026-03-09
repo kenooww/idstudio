@@ -538,24 +538,72 @@ export default function IDCardStudio() {
   };
 
   const handlePrint = () => {
-    const style=document.createElement("style");
-    const pw = A4_W, ph = A4_H;
-    const css = [
+    // Temporarily remove the preview scale so pages print at true A4 size.
+    // We do this by adding a class to the scale wrappers, then restoring.
+    const scaleWrappers = document.querySelectorAll("#print-area .print-page > div");
+    const pageWrappers  = document.querySelectorAll("#print-area .print-page");
+
+    // 1. Strip scale + size constraints for printing
+    scaleWrappers.forEach(el => {
+      el.dataset.origTransform = el.style.transform || "";
+      el.dataset.origPosition  = el.style.position  || "";
+      el.style.transform = "none";
+      el.style.position  = "relative";
+    });
+    pageWrappers.forEach(el => {
+      el.dataset.origWidth  = el.style.width  || "";
+      el.dataset.origHeight = el.style.height || "";
+      el.dataset.origMargin = el.style.marginBottom || "";
+      el.dataset.origShadow = el.style.boxShadow || "";
+      el.style.width        = A4_W + "px";
+      el.style.height       = A4_H + "px";
+      el.style.marginBottom = "0";
+      el.style.boxShadow    = "none";
+    });
+
+    // 2. Inject minimal print CSS
+    const style = document.createElement("style");
+    style.id = "__print_style__";
+    style.innerHTML = [
       "* { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }",
       "@media print {",
-      "  body * { visibility: hidden !important; }",
-      "  #print-area, #print-area * { visibility: visible !important; }",
-      "  #print-area { position: fixed !important; top: 0 !important; left: 0 !important; display: block !important; }",
-      "  .print-page { width: " + pw + "px !important; height: " + ph + "px !important; margin: 0 !important; padding: 0 !important; box-shadow: none !important; overflow: hidden !important; page-break-after: always !important; break-after: page !important; }",
+      "  body > * { display: none !important; }",
+      "  #print-area { display: flex !important; flex-direction: column !important; position: static !important; }",
+      "  #print-area * { visibility: visible !important; }",
+      "  body { margin: 0 !important; padding: 0 !important; background: white !important; }",
+      "  .print-page { page-break-after: always !important; break-after: page !important; overflow: hidden !important; }",
       "  .print-page:last-child { page-break-after: auto !important; break-after: auto !important; }",
-      "  .print-page > div { transform: none !important; width: " + pw + "px !important; height: " + ph + "px !important; position: relative !important; }",
-      "  @page { size: " + pw + "px " + ph + "px; margin: 0; }",
+      "  @page { size: " + A4_W + "px " + A4_H + "px; margin: 0; }",
       "}"
     ].join("\n");
-    style.innerHTML = css;
     document.head.appendChild(style);
+
+    // 3b. Move print-area to body root so "body > *" hiding works
+    const printArea = document.getElementById("print-area");
+    const originalParent = printArea ? printArea.parentNode : null;
+    const originalNextSibling = printArea ? printArea.nextSibling : null;
+    if (printArea) document.body.appendChild(printArea);
+
     window.print();
-    setTimeout(()=>document.head.removeChild(style),1500);
+
+    // 4. Restore everything after print dialog closes
+    setTimeout(() => {
+      document.head.removeChild(style);
+      // Restore print-area to original position
+      if (printArea && originalParent) {
+        originalParent.insertBefore(printArea, originalNextSibling);
+      }
+      scaleWrappers.forEach(el => {
+        el.style.transform = el.dataset.origTransform;
+        el.style.position  = el.dataset.origPosition;
+      });
+      pageWrappers.forEach(el => {
+        el.style.width        = el.dataset.origWidth;
+        el.style.height       = el.dataset.origHeight;
+        el.style.marginBottom = el.dataset.origMargin;
+        el.style.boxShadow    = el.dataset.origShadow;
+      });
+    }, 1500);
   };
 
   const totalPages = Math.ceil(employees.length / cardsPerPage);
