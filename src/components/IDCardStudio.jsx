@@ -233,8 +233,8 @@ export default function IDCardStudio() {
   const [tab, setTab] = useState("design");
   const [designTab, setDesignTab] = useState("front"); // front | back
   const [design, setDesign] = useState(DEFAULT_DESIGN);
-  const [apiKey, setApiKey] = useState("");
-  const [sheetId, setSheetId] = useState("");
+  const [apiKey, setApiKey] = useState("AIzaSyAEt8qUfGyJha7BNnPTOy5WWjxrK-ONuP4");
+  const [sheetId, setSheetId] = useState("1btF66wESO53_dFnMduKgK90xkgHtxLKg2hB-Cm2uPDw");
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
